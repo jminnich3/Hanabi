@@ -4,6 +4,10 @@ import java.util.Set;
 /**
  * Tracks possible values for one unknown card
  */
+
+//i think we should track the last hint from the partner
+    //and the "focus from that hint" (maybe just the focus)
+
 public class CardKnowledge {
     private Set<Card> options;
 

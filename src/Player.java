@@ -121,8 +121,17 @@ public class Player {
 	 *     his cards have that color, or if no hints remain. This command consumes a hint.
 	 */
 	public String ask(int yourHandSize, Hand partnerHand, Board boardState) {
+		//OUR LOGIC:
+		//if we have tokens:
+			//if we have a playable card(s)
+				//play left most playable card
+			//else (not enough info)
+				//if partner put focus on card
+				//else if partner has playable cards
+				//else (partner has no playable cards)
+		//... this is unfinished... im just following the diagram...
+
 		// A really dumb agent that just discards
-		// TODO: replace this with your agent's decision-making code
 		return "DISCARD 0 0";
 	}
 
