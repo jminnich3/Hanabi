@@ -119,6 +119,17 @@ public class CardKnowledge {
         return false;
     }
 
+    public boolean mostLikelyPlayableFromHint(Board b){
+        if(options.size() <= 5){
+            for (Card crd : options) {
+                if (b.isLegalPlay(crd)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public boolean isDiscardable(Board b){
         for (Card crd : options) {
             if (crd.value > b.tableau.get(crd.color)) {

@@ -104,29 +104,14 @@ public class Player {
 		return impossibleCards;
 	}
 	
-	/**
-	 * This method runs whenever your partner discards a card.
-	 * @param startHand The hand your partner started with before discarding.
-	 * @param discard The card he discarded.
-	 * @param disIndex The index from which he discarded it.
-	 * @param draw The card he drew to replace it; null, if the deck is empty.
-	 * @param drawIndex The index to which he drew it.
-	 * @param finalHand The hand your partner ended with after redrawing.
-	 * @param boardState The state of the board after play.
-	 */
+
+	 // This method runs whenever your partner discards a card.
 	public void tellPartnerDiscard(Hand startHand, Card discard, int disIndex, Card draw, int drawIndex, 
 			Hand finalHand, Board boardState) {
 		whatPartnerKnows[drawIndex] = new CardKnowledge(getImpossibleCards(boardState));
 	}
 	
-	/**
-	 * This method runs whenever you discard a card, to let you know what you discarded.
-	 * @param discard The card you discarded.
-	 * @param disIndex The index from which you discarded it.
-	 * @param drawIndex The index to which you drew the new card (if drawSucceeded)
-	 * @param drawSucceeded true if there was a card to draw; false if the deck was empty
-	 * @param boardState The state of the board after play.
-	 */
+	// This method runswhenever you discard a card, to let you know what you discarded.
 	public void tellYourDiscard(Card discard, int disIndex, int drawIndex, boolean drawSucceeded, Board boardState) {
 		//update knowledge
 		//call default constructor on cardKnowledge at drawIndex
@@ -157,38 +142,17 @@ public class Player {
 		}
 
 	}
-	
-	/**
-	 * This method runs whenever your partner played a card
-	 * @param startHand The hand your partner started with before playing.
-	 * @param play The card she played.
-	 * @param playIndex The index from which she played it.
-	 * @param draw The card she drew to replace it; null, if the deck was empty.
-	 * @param drawIndex The index to which she drew the new card.
-	 * @param finalHand The hand your partner ended with after playing.
-	 * @param wasLegalPlay Whether the play was legal or not.
-	 * @param boardState The state of the board after play.
-	 */
+
+	// This method runs whenever your partner played a card
 	public void tellPartnerPlay(Hand startHand, Card play, int playIndex, Card draw, int drawIndex,
 			Hand finalHand, boolean wasLegalPlay, Board boardState) {
 
 		whatPartnerKnows[drawIndex] = new CardKnowledge(getImpossibleCards(boardState));
 	}
 
-	
-	/**
-	 * This method runs whenever you play a card, to let you know what you played.
-	 * @param play The card you played.
-	 * @param playIndex The index from which you played it.
-	 * @param drawIndex The index to which you drew the new card (if drawSucceeded)
-	 * @param drawSucceeded  true if there was a card to draw; false if the deck was empty
-	 * @param wasLegalPlay Whether the play was legal or not.
-	 * @param boardState The state of the board after play.
-	 */
+	// This method runs whenever you play a card, to let you know what you played.
 	public void tellYourPlay(Card play, int playIndex, int drawIndex, boolean drawSucceeded,
 							 boolean wasLegalPlay, Board boardState) {
-		//update kowledge
-
 		knowledges[drawIndex] = new CardKnowledge(getImpossibleCards(boardState));
 	}
 
@@ -207,13 +171,7 @@ public class Player {
 
 
 
-	/**
-	 * This method runs whenever your partner gives you a hint as to the color of your cards.
-	 * @param color The color hinted, from Colors.java: RED, YELLOW, BLUE, GREEN, or WHITE.
-	 * @param indices The indices (from 0-4) in your hand with that color.
-	 * @param partnerHand Your partner's current hand.
-	 * @param boardState The state of the board after the hint.
-	 */
+	//  This method runs whenever your partner gives you a hint as to the color of your cards.
 	public void tellColorHint(int color, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
 		//update knowledge
 		for(int index : indices){
@@ -228,24 +186,18 @@ public class Player {
 		}
 	}
 	
-	/**
-	 * This method runs whenever your partner gives you a hint as to the numbers on your cards.
-	 * @param number The number hinted, from 1-5.
-	 * @param indices The indices (from 0-4) in your hand with that number.
-	 * @param partnerHand Your partner's current hand.
-	 * @param boardState The state of the board after the hint.
-	 */
+
+	 // This method runs whenever your partner gives you a hint as to the numbers on your cards.
 	public void tellNumberHint(int number, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
-		//update knowledge
 		for(int index : indices){
 			knowledges[index].knowValue(number);
 		}
 	}
 
-	public void tellNumberHint(int number, ArrayList<Integer> indices) {
+	public void updatePartnerNumberHint(int number, ArrayList<Integer> indices) {
 		//update knowledge
 		for(int index : indices){
-			knowledges[index].knowValue(number);
+			whatPartnerKnows[index].knowValue(number);
 		}
 	}
 
@@ -313,26 +265,21 @@ public class Player {
 	 *     his cards have that color, or if no hints remain. This command consumes a hint.
 	 */
 	public String ask(int yourHandSize, Hand partnerHand, Board boardState) {
+
+		// debug info
 		System.out.println(YELLOW + "NEW ASK: -----------------------------------------------------------" + RESET);
 		System.out.println("Here is the information that I know about each card:");
 		for(int i = 0; i < yourHandSize; i++)
 		{
 			System.out.println("Card " + i + ": " + knowledges[i].getOptions());
 		}
+		System.out.println();
 
-		//do I have an obvious discard?
-			//update method
-			//Discard
-		//do I have an obvious play?
-			//update method
-			//Play
-		//does partner have obvious hints?
-			//update method
-			//Hint
-		//Tokens > 2
-			//Hint color/number that has most of that type
-		//else
-			//Discard rightmost unknown card
+		System.out.println("PARTNER CARD INFO:");
+		for(int i = 0; i < yourHandSize; i++)
+		{
+			System.out.println("Card " + i + ": " + whatPartnerKnows[i].getOptions());
+		}
 
 		//obvious discard?
 		for(int i = 0; i < knowledges.length; i++)
@@ -348,9 +295,9 @@ public class Player {
 		//obvious play?
 		for(int i = 0; i < knowledges.length; i++)
 		{
-			if(knowledges[i].isDefinitelyPlayable(boardState))
+			if(knowledges[i].mostLikelyPlayableFromHint(boardState))
 			{
-				tellYourPlay(i, true, boardState);
+				// tellYourPlay(i, true, boardState);
 				System.out.println(GREEN + "Play " + i + " " + i + RESET);
 				return "PLAY " + i + " " + i;
 			}
@@ -371,6 +318,7 @@ public class Player {
 				//color complete
 			//does partner have > 2 of a number/color?
 
+
 		//this is checking if partner has a playable card
 		if(boardState.numHints > 0)
 		{
@@ -378,12 +326,14 @@ public class Player {
 			{
 				Card currentCard = partnerHand.get(i);
 				//TODO: this needs fixed
-				System.out.println(BLUE + "Checking if partner has a playable card: " + currentCard.value + " == " + ((int)(boardState.tableau.get(i)) + 1) + " && " + currentCard.color + " == " + i + RESET);
-				if(currentCard.value == boardState.tableau.get(i) + 1 && currentCard.color == i)
+				System.out.println(BLUE + "Checking if partner has a playable card: " + currentCard.value + " of " + Colors.suitColor(currentCard.color)  + " == " + ((int)(boardState.tableau.get(currentCard.color)) + 1) + " of " + Colors.suitColor(currentCard.color) + RESET);
+
+				//currentCard.value == boardState.tableau.get(currentCard.color) + 1
+				if(currentCard.value == boardState.tableau.get(currentCard.color) + 1)
 				{
 					if(whatPartnerKnows[i].getKnownValue() != currentCard.value)
 					{
-						tellNumberHint(currentCard.value, getIndicesOfValue(partnerHand, currentCard.value));
+						updatePartnerNumberHint(currentCard.value, getIndicesOfValue(partnerHand, currentCard.value));
 						System.out.println(GREEN + "Number hint " + currentCard.value + RESET);
 						return "NUMBERHINT " + currentCard.value;
 					}
@@ -398,7 +348,7 @@ public class Player {
 				{
 					if(whatPartnerKnows[i].getKnownValue() != currentCard.value)
 					{
-						tellNumberHint(currentCard.value, getIndicesOfValue(partnerHand, currentCard.value));
+						updatePartnerNumberHint(currentCard.value, getIndicesOfValue(partnerHand, currentCard.value));
 						System.out.println(GREEN + "Number hint " + currentCard.value + RESET);
 						return "NUMBERHINT " + currentCard.value;
 					}
@@ -409,7 +359,7 @@ public class Player {
 		//if we have a lot of hints, give a hint that gives partner the most info possible
 		if(boardState.numHints > 1)
 		{
-			//hint color/number that has most of that type
+			//hint color/number that has most of that type UNLESS they already know about it
 			int[] colorCounts = new int[5];
 			int[] valueCounts = new int[5];
 			for(int i = 0; i < partnerHand.size(); i++)
@@ -443,15 +393,16 @@ public class Player {
 
 			if(maxColorCount > maxValueCount)
 			{
+
 				System.out.println(BLUE + "It seems like the most in this card are colors " + Colors.suitColor(maxColor) + RESET);
-				tellColorHint(maxColor, getIndicesOfColor(partnerHand, maxColor));
+				//tellColorHint(maxColor, getIndicesOfColor(partnerHand, maxColor));
 				System.out.println(GREEN + "Color hint " + maxColor + RESET);
 				return "COLORHINT " + maxColor;
 			}
 			else
 			{
 				System.out.println(BLUE + "It seems like the most in this card are values " + maxValue + RESET);
-				tellNumberHint(maxValue, getIndicesOfValue(partnerHand, maxValue));
+				//tellNumberHint(maxValue, getIndicesOfValue(partnerHand, maxValue));
 				System.out.println(GREEN + "Number hint " + maxValue + RESET);
 				return "NUMBERHINT " + (maxValue);
 			}
