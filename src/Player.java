@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 /**
@@ -9,7 +10,6 @@ public class Player {
 	// Add member variables as needed. You MAY NOT use static variables, or otherwise allow direct communication between
 	// different instances of this class by any means; doing so will result in a score of 0.
 
-	ArrayList<Card> discardedCards;
 	CardKnowledge[] knowledges;
 
 	/**
@@ -20,6 +20,68 @@ public class Player {
 		for (int i = 0; i < 5; i++) {
 			knowledges[i] = new CardKnowledge();
 		}
+	}
+
+	public HashSet<Card> getImpossibleCards(Board currentBoard)
+	{
+		HashMap<Card, Integer> cardCounts = new HashMap<>();
+
+		//check plays
+		for(int i = 0; i < currentBoard.tableau.size(); i++)
+		{
+			for(int j = 0; j < currentBoard.tableau.get(i); j++)
+			{
+				Card card = new Card(i, j);
+				if(cardCounts.containsKey(card))
+				{
+					cardCounts.put(card, cardCounts.get(card) + 1);
+				}
+				else
+				{
+					cardCounts.put(card, 1);
+				}
+			}
+		}
+
+		//check discards
+		for(Card c : currentBoard.discards)
+		{
+			if(cardCounts.containsKey(c))
+			{
+				cardCounts.put(c, cardCounts.get(c) + 1);
+			}
+			else
+			{
+				cardCounts.put(c, 1);
+			}
+		}
+
+		//fill impossible cards
+		HashSet<Card> impossibleCards = new HashSet<>();
+		for(Card c : cardCounts.keySet())
+		{
+			if(c.value == 1 && cardCounts.get(c) == 3)
+			{
+				impossibleCards.add(c);
+			}
+			else if(c.value == 2 && cardCounts.get(c) == 2)
+			{
+				impossibleCards.add(c);
+			}
+			else if(c.value == 3 && cardCounts.get(c) == 2)
+			{
+				impossibleCards.add(c);
+			}
+			else if(c.value == 4 && cardCounts.get(c) == 2)
+			{
+				impossibleCards.add(c);
+			}
+			else if(c.value == 5 && cardCounts.get(c) == 1)
+			{
+				impossibleCards.add(c);
+			}
+		}
+		return impossibleCards;
 	}
 	
 	/**
@@ -47,6 +109,10 @@ public class Player {
 	 */
 	public void tellYourDiscard(Card discard, int disIndex, int drawIndex, boolean drawSucceeded, Board boardState) {
 		//update knowledge
+		//call default constructor on cardKnowledge at drawIndex
+		//update cardKnowledge at disIndex with board state and discard
+
+		knowledges[drawIndex] = new CardKnowledge(getImpossibleCards(boardState));
 	}
 	
 	/**
@@ -79,6 +145,8 @@ public class Player {
 	public void tellYourPlay(Card play, int playIndex, int drawIndex, boolean drawSucceeded,
 							 boolean wasLegalPlay, Board boardState) {
 		//update kowledge
+
+		knowledges[drawIndex] = new CardKnowledge(getImpossibleCards(boardState));
 	}
 
 
@@ -92,10 +160,6 @@ public class Player {
 	 */
 	public void tellColorHint(int color, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
 		//update knowledge
-		for(int index : indices){
-			knowledges[index].knowColor(color);
-		}
-
 	}
 	
 	/**
@@ -107,9 +171,6 @@ public class Player {
 	 */
 	public void tellNumberHint(int number, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
 		//update knowledge
-		for(int index : indices){
-			knowledges[index].knowValue(number);
-		}
 	}
 	
 	/**
