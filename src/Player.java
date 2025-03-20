@@ -1,4 +1,3 @@
-import javax.smartcardio.Card;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -93,6 +92,10 @@ public class Player {
 	 */
 	public void tellColorHint(int color, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
 		//update knowledge
+		for(int index : indices){
+			knowledges[index].knowColor(color);
+		}
+
 	}
 	
 	/**
@@ -104,6 +107,9 @@ public class Player {
 	 */
 	public void tellNumberHint(int number, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
 		//update knowledge
+		for(int index : indices){
+			knowledges[index].knowValue(number);
+		}
 	}
 	
 	/**
