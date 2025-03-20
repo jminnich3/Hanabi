@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Random;
 
 /**
  * @author You
@@ -11,14 +12,22 @@ public class Player {
 	// different instances of this class by any means; doing so will result in a score of 0.
 
 	CardKnowledge[] knowledges;
+	CardKnowledge[] whatPartnerKnows;
+
+	Random random;
 
 	/**
 	 * This default constructor should be the only constructor you supply.
 	 */
 	public Player() {
+		random = new Random();
 		knowledges = new CardKnowledge[5];
 		for (int i = 0; i < 5; i++) {
 			knowledges[i] = new CardKnowledge();
+		}
+		whatPartnerKnows = new CardKnowledge[5];
+		for (int i = 0; i < 5; i++) {
+			whatPartnerKnows[i] = new CardKnowledge();
 		}
 	}
 
@@ -98,6 +107,10 @@ public class Player {
 			Hand finalHand, Board boardState) {
 
 	}
+
+	public void tellPartnerDiscard(int index, Board boardState) {
+		whatPartnerKnows[index] = new CardKnowledge(getImpossibleCards(boardState));
+	}
 	
 	/**
 	 * This method runs whenever you discard a card, to let you know what you discarded.
@@ -155,6 +168,10 @@ public class Player {
 
 	}
 
+	public void tellPartnerPlay(int index, Board boardState) {
+		whatPartnerKnows[index] = new CardKnowledge(getImpossibleCards(boardState));
+	}
+
 	
 	/**
 	 * This method runs whenever you play a card, to let you know what you played.
@@ -200,6 +217,13 @@ public class Player {
 			knowledges[index].knowColor(color);
 		}
 	}
+
+	public void tellColorHint(int color, ArrayList<Integer> indices) {
+		//update knowledge
+		for(int index : indices){
+			knowledges[index].knowColor(color);
+		}
+	}
 	
 	/**
 	 * This method runs whenever your partner gives you a hint as to the numbers on your cards.
@@ -220,6 +244,49 @@ public class Player {
 		for(int index : indices){
 			knowledges[index].knowValue(number);
 		}
+	}
+
+	public ArrayList<Integer> getIndicesOfColor(Hand partnerHand, int color)
+	{
+		ArrayList<Integer> indices = new ArrayList<>();
+		for(int i = 0; i < partnerHand.size(); i++)
+		{
+			if(partnerHand.get(i).color == color)
+			{
+				indices.add(i);
+			}
+		}
+		return indices;
+	}
+
+	public ArrayList<Integer> getIndicesOfValue(Hand partnerHand, int value)
+	{
+		ArrayList<Integer> indices = new ArrayList<>();
+		for(int i = 0; i < partnerHand.size(); i++)
+		{
+			if(partnerHand.get(i).value == value)
+			{
+				indices.add(i);
+			}
+		}
+		return indices;
+	}
+
+	public boolean isPartnerCardFullyLessThanOrEqualToAllBoardValues(Card c, Board boardState)
+	{
+		for(int i = 0; i < boardState.tableau.size(); i++)
+		{
+			if(c.value > boardState.tableau.get(c.color))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public boolean isColorOfCardFullyUsed(Card c, Board boardState)
+	{
+		return boardState.tableau.get(c.color) == 5;
 	}
 	
 	/**
@@ -243,6 +310,13 @@ public class Player {
 	 *     his cards have that color, or if no hints remain. This command consumes a hint.
 	 */
 	public String ask(int yourHandSize, Hand partnerHand, Board boardState) {
+		System.out.println("NEW ASK:");
+		System.out.println("Here is the information that I know about each card:");
+		for(int i = 0; i < yourHandSize; i++)
+		{
+			System.out.println("Card " + i + ": " + knowledges[i].getOptions());
+		}
+
 		//do I have an obvious discard?
 			//update method
 			//Discard
@@ -276,20 +350,102 @@ public class Player {
 				tellYourPlay(i, true, boardState);
 				return "PLAY " + i + " " + i;
 			}
+			if(knowledges[i].couldBePlayable(boardState))
+			{
+				if(random.nextInt(3) == 1)
+				{
+					tellYourPlay(i, true, boardState);
+					return "PLAY " + i + " " + i;
+				}
+			}
 		}
 
 		//obvious hints?
-//		for(int i = 0; i < partnerHand.size(); i++)
-//		{
-//			Card currentCard = partnerHand.get(i);
-//			if(currentCard.value == boardState.tableau.get(i) + 1)
-//			{
-//				//hint number
-//				//tellNumberHint(currentCard.value, getIndices(partnerHand));
-//				//return "NUMBERHINT " + currentCard.value;
-//			}
-//			//implement logic for safe discard
-//		}
+			//does partner have a playable card?
+			//does partner have a discardable card?
+				//number complete
+				//color complete
+			//does partner have > 2 of a number/color?
+
+		//this is checking if partner has a playable card
+		if(boardState.numHints > 0)
+		{
+			for(int i = 0; i < partnerHand.size(); i++)
+			{
+				Card currentCard = partnerHand.get(i);
+				if(currentCard.value == boardState.tableau.get(i) + 1)
+				{
+					if(whatPartnerKnows[i].getKnownValue() != currentCard.value)
+					{
+						tellNumberHint(currentCard.value, getIndicesOfValue(partnerHand, currentCard.value));
+						return "NUMBERHINT " + currentCard.value;
+					}
+				}
+			}
+
+			//this hints a guaranteed discard
+			for(int i = 0; i < partnerHand.size(); i++)
+			{
+				Card currentCard = partnerHand.get(i);
+				if(isColorOfCardFullyUsed(currentCard, boardState) && isPartnerCardFullyLessThanOrEqualToAllBoardValues(currentCard, boardState))
+				{
+					if(whatPartnerKnows[i].getKnownValue() != currentCard.value)
+					{
+						tellNumberHint(currentCard.value, getIndicesOfValue(partnerHand, currentCard.value));
+						return "NUMBERHINT " + currentCard.value;
+					}
+				}
+			}
+		}
+
+		//if we have a lot of hints, give a hint that gives partner the most info possible
+		if(boardState.numHints > 1)
+		{
+			//hint color/number that has most of that type
+			int[] colorCounts = new int[5];
+			int[] valueCounts = new int[5];
+			for(int i = 0; i < partnerHand.size(); i++)
+			{
+				Card currentCard = partnerHand.get(i);
+				colorCounts[currentCard.color]++;
+				valueCounts[currentCard.value - 1]++;
+			}
+
+			int maxColor = 0;
+			int maxColorCount = 0;
+			for(int i = 0; i < colorCounts.length; i++)
+			{
+				if(colorCounts[i] > maxColorCount)
+				{
+					maxColor = i;
+					maxColorCount = colorCounts[i];
+				}
+			}
+
+			int maxValue = 0;
+			int maxValueCount = 0;
+			for(int i = 0; i < valueCounts.length; i++)
+			{
+				if(valueCounts[i] > maxValueCount)
+				{
+					maxValue = i + 1;
+					maxValueCount = valueCounts[i];
+				}
+			}
+
+			if(maxColorCount > maxValueCount)
+			{
+				tellColorHint(maxColor, getIndicesOfColor(partnerHand, maxColor));
+				return "COLORHINT " + maxColor;
+			}
+			else
+			{
+				tellNumberHint(maxValue, getIndicesOfValue(partnerHand, maxValue));
+				return "NUMBERHINT " + (maxValue + 1);
+			}
+		}
+
+
 
 		return "DISCARD 0 0";
 	}

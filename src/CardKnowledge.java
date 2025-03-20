@@ -11,6 +11,11 @@ import java.util.Set;
 public class CardKnowledge {
     private Set<Card> options;
 
+    public Set<Card> getOptions()
+    {
+        return options;
+    }
+
 
     /**
      * Allow all possible cards
