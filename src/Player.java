@@ -335,6 +335,13 @@ public class Player {
 					{
 						updatePartnerNumberHint(currentCard.value, getIndicesOfValue(partnerHand, currentCard.value));
 						System.out.println(GREEN + "Number hint " + currentCard.value + RESET);
+
+						System.out.println("PARTNER CARD INFO:");
+						for(int k = 0; k < yourHandSize; k++)
+						{
+							System.out.println("Card " + k + ": " + whatPartnerKnows[k].getOptions());
+						}
+
 						return "NUMBERHINT " + currentCard.value;
 					}
 				}
