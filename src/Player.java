@@ -112,7 +112,30 @@ public class Player {
 		//call default constructor on cardKnowledge at drawIndex
 		//update cardKnowledge at disIndex with board state and discard
 
-		knowledges[drawIndex] = new CardKnowledge(getImpossibleCards(boardState));
+		if(drawSucceeded)
+		{
+			knowledges[drawIndex] = new CardKnowledge(getImpossibleCards(boardState));
+		}
+		else
+		{
+			knowledges[drawIndex] = null;
+		}
+	}
+
+	public void tellYourDiscard(int index, boolean drawSucceeded, Board boardState) {
+		//update knowledge
+		//call default constructor on cardKnowledge at drawIndex
+		//update cardKnowledge at disIndex with board state and discard
+
+		if(drawSucceeded)
+		{
+			knowledges[index] = new CardKnowledge(getImpossibleCards(boardState));
+		}
+		else
+		{
+			knowledges[index] = null;
+		}
+
 	}
 	
 	/**
@@ -149,6 +172,19 @@ public class Player {
 		knowledges[drawIndex] = new CardKnowledge(getImpossibleCards(boardState));
 	}
 
+	public void tellYourPlay(int index, boolean drawSucceeded, Board boardState) {
+		//update kowledge
+
+		if(drawSucceeded)
+		{
+			knowledges[index] = new CardKnowledge(getImpossibleCards(boardState));
+		}
+		else
+		{
+			knowledges[index] = null;
+		}
+	}
+
 
 
 	/**
@@ -173,6 +209,13 @@ public class Player {
 	 * @param boardState The state of the board after the hint.
 	 */
 	public void tellNumberHint(int number, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
+		//update knowledge
+		for(int index : indices){
+			knowledges[index].knowValue(number);
+		}
+	}
+
+	public void tellNumberHint(int number, ArrayList<Integer> indices) {
 		//update knowledge
 		for(int index : indices){
 			knowledges[index].knowValue(number);
@@ -213,6 +256,41 @@ public class Player {
 			//Hint color/number that has most of that type
 		//else
 			//Discard rightmost unknown card
+
+		//obvious discard?
+		for(int i = 0; i < knowledges.length; i++)
+		{
+			if(knowledges[i].isDiscardable(boardState))
+			{
+				tellYourDiscard(i, true, boardState);
+				System.out.println("Discard " + i + " " + i);
+				return "DISCARD " + i + " " + i;
+			}
+		}
+
+		//obvious play?
+		for(int i = 0; i < knowledges.length; i++)
+		{
+			if(knowledges[i].isDefinitelyPlayable(boardState))
+			{
+				tellYourPlay(i, true, boardState);
+				return "PLAY " + i + " " + i;
+			}
+		}
+
+		//obvious hints?
+//		for(int i = 0; i < partnerHand.size(); i++)
+//		{
+//			Card currentCard = partnerHand.get(i);
+//			if(currentCard.value == boardState.tableau.get(i) + 1)
+//			{
+//				//hint number
+//				//tellNumberHint(currentCard.value, getIndices(partnerHand));
+//				//return "NUMBERHINT " + currentCard.value;
+//			}
+//			//implement logic for safe discard
+//		}
+
 		return "DISCARD 0 0";
 	}
 }
