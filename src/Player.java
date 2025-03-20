@@ -11,8 +11,19 @@ public class Player {
 	// Add member variables as needed. You MAY NOT use static variables, or otherwise allow direct communication between
 	// different instances of this class by any means; doing so will result in a score of 0.
 
+	public static final String RESET = "\u001B[0m";
+	public static final String BLACK = "\u001B[30m";
+	public static final String RED = "\u001B[31m";
+	public static final String GREEN = "\u001B[32m";
+	public static final String YELLOW = "\u001B[33m";
+	public static final String BLUE = "\u001B[34m";
+	public static final String PURPLE = "\u001B[35m";
+	public static final String CYAN = "\u001B[36m";
+	public static final String WHITE = "\u001B[37m";
+
 	CardKnowledge[] knowledges;
 	CardKnowledge[] whatPartnerKnows;
+	int focusCardIndex; //implement to be updated as given hints
 
 	Random random;
 
@@ -105,11 +116,7 @@ public class Player {
 	 */
 	public void tellPartnerDiscard(Hand startHand, Card discard, int disIndex, Card draw, int drawIndex, 
 			Hand finalHand, Board boardState) {
-
-	}
-
-	public void tellPartnerDiscard(int index, Board boardState) {
-		whatPartnerKnows[index] = new CardKnowledge(getImpossibleCards(boardState));
+		whatPartnerKnows[drawIndex] = new CardKnowledge(getImpossibleCards(boardState));
 	}
 	
 	/**
@@ -165,11 +172,7 @@ public class Player {
 	public void tellPartnerPlay(Hand startHand, Card play, int playIndex, Card draw, int drawIndex,
 			Hand finalHand, boolean wasLegalPlay, Board boardState) {
 
-
-	}
-
-	public void tellPartnerPlay(int index, Board boardState) {
-		whatPartnerKnows[index] = new CardKnowledge(getImpossibleCards(boardState));
+		whatPartnerKnows[drawIndex] = new CardKnowledge(getImpossibleCards(boardState));
 	}
 
 	
@@ -310,7 +313,7 @@ public class Player {
 	 *     his cards have that color, or if no hints remain. This command consumes a hint.
 	 */
 	public String ask(int yourHandSize, Hand partnerHand, Board boardState) {
-		System.out.println("NEW ASK:");
+		System.out.println(YELLOW + "NEW ASK: -----------------------------------------------------------" + RESET);
 		System.out.println("Here is the information that I know about each card:");
 		for(int i = 0; i < yourHandSize; i++)
 		{
@@ -337,7 +340,7 @@ public class Player {
 			if(knowledges[i].isDiscardable(boardState))
 			{
 				tellYourDiscard(i, true, boardState);
-				System.out.println("Discard " + i + " " + i);
+				System.out.println(GREEN + "Discard " + i + " " + i + RESET);
 				return "DISCARD " + i + " " + i;
 			}
 		}
@@ -348,16 +351,17 @@ public class Player {
 			if(knowledges[i].isDefinitelyPlayable(boardState))
 			{
 				tellYourPlay(i, true, boardState);
+				System.out.println(GREEN + "Play " + i + " " + i + RESET);
 				return "PLAY " + i + " " + i;
 			}
-			if(knowledges[i].couldBePlayable(boardState))
-			{
-				if(random.nextInt(3) == 1)
-				{
-					tellYourPlay(i, true, boardState);
-					return "PLAY " + i + " " + i;
-				}
-			}
+//			if(knowledges[i].couldBePlayable(boardState))
+//			{
+//				if(random.nextInt(3) == 1)
+//				{
+//					tellYourPlay(i, true, boardState);
+//					return "PLAY " + i + " " + i;
+//				}
+//			}
 		}
 
 		//obvious hints?
@@ -373,11 +377,14 @@ public class Player {
 			for(int i = 0; i < partnerHand.size(); i++)
 			{
 				Card currentCard = partnerHand.get(i);
-				if(currentCard.value == boardState.tableau.get(i) + 1)
+				//TODO: this needs fixed
+				System.out.println(BLUE + "Checking if partner has a playable card: " + currentCard.value + " == " + ((int)(boardState.tableau.get(i)) + 1) + " && " + currentCard.color + " == " + i + RESET);
+				if(currentCard.value == boardState.tableau.get(i) + 1 && currentCard.color == i)
 				{
 					if(whatPartnerKnows[i].getKnownValue() != currentCard.value)
 					{
 						tellNumberHint(currentCard.value, getIndicesOfValue(partnerHand, currentCard.value));
+						System.out.println(GREEN + "Number hint " + currentCard.value + RESET);
 						return "NUMBERHINT " + currentCard.value;
 					}
 				}
@@ -387,11 +394,12 @@ public class Player {
 			for(int i = 0; i < partnerHand.size(); i++)
 			{
 				Card currentCard = partnerHand.get(i);
-				if(isColorOfCardFullyUsed(currentCard, boardState) && isPartnerCardFullyLessThanOrEqualToAllBoardValues(currentCard, boardState))
+				if(isColorOfCardFullyUsed(currentCard, boardState) || isPartnerCardFullyLessThanOrEqualToAllBoardValues(currentCard, boardState))
 				{
 					if(whatPartnerKnows[i].getKnownValue() != currentCard.value)
 					{
 						tellNumberHint(currentCard.value, getIndicesOfValue(partnerHand, currentCard.value));
+						System.out.println(GREEN + "Number hint " + currentCard.value + RESET);
 						return "NUMBERHINT " + currentCard.value;
 					}
 				}
@@ -435,13 +443,17 @@ public class Player {
 
 			if(maxColorCount > maxValueCount)
 			{
+				System.out.println(BLUE + "It seems like the most in this card are colors " + Colors.suitColor(maxColor) + RESET);
 				tellColorHint(maxColor, getIndicesOfColor(partnerHand, maxColor));
+				System.out.println(GREEN + "Color hint " + maxColor + RESET);
 				return "COLORHINT " + maxColor;
 			}
 			else
 			{
+				System.out.println(BLUE + "It seems like the most in this card are values " + maxValue + RESET);
 				tellNumberHint(maxValue, getIndicesOfValue(partnerHand, maxValue));
-				return "NUMBERHINT " + (maxValue + 1);
+				System.out.println(GREEN + "Number hint " + maxValue + RESET);
+				return "NUMBERHINT " + (maxValue);
 			}
 		}
 

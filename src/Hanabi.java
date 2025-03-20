@@ -76,7 +76,7 @@ public class Hanabi {
 	 * @return 0 if the players run out of fuses or there is an exception; tableau sum otherwise.
 	 */
 	public int play() {
-		
+
 		if (chatty) {
 			System.out.println("Player 0 hand: " + hands.get(0));
 			System.out.println("Player 1 hand: " + hands.get(1));
@@ -84,6 +84,8 @@ public class Hanabi {
 		}
 
 		while (true) {
+
+            System.out.println("\u001B[33m" + "CURRENT PLAYER = " + currentPlayer + "\u001B[33m");
 
 			String response = players.get(currentPlayer).ask(hands.get(currentPlayer).size(),
 					new Hand(hands.get(otherPlayer)), new Board(boardState)); // pass copies to avoid malicious editing
