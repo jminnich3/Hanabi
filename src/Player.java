@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -478,4 +479,43 @@ public class Player {
 
 		return "DISCARD 0 0";
 	}
+
+	public boolean leftMostPlayPossible(ArrayList<Integer> focusIndexes, Board boardState){
+		return knowledges[focusIndexes.getFirst()].couldBePlayable(boardState);
+	}
+
+	public boolean uniqueNumLeftOn(Hand partnerHand, int focusIndex){
+		int val = partnerHand.get(focusIndex).value;
+
+		for (int i = 0; i < focusIndex; i++) {
+			if(partnerHand.get(i).value == val){
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public boolean uniqueColorLeftOn(Hand partnerHand, int focusIndex){
+		int color = partnerHand.get(focusIndex).color;
+
+		for (int i = 0; i < focusIndex; i++) {
+			if(partnerHand.get(i).color == color){
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+
+	public int getDiscardIndex(){
+		for (int i = 4; i >= 0; i--) {
+			if(knowledges[i].numOptions() == 25){
+				return i;
+			}
+		}
+		return -1;
+	}
+
 }
