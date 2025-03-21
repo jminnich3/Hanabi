@@ -284,7 +284,7 @@ public class Player {
 		//obvious play?
 		for(int i = 0; i < knowledges.length; i++)
 		{
-			if(knowledges[i].mostLikelyPlayableFromHint(boardState))
+			if(knowledges[i].isDefinitelyPlayable(boardState))
 			{
 				// tellYourPlay(i, true, boardState);
 				System.out.println(GREEN + "Play " + i + " " + i + RESET);
