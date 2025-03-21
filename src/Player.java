@@ -354,18 +354,69 @@ public class Player {
 				//discard it
 			//do we have an obvious play?
 				//play it
-		//If we have tokens
-			//if partner has obvious play
-				//send a hint with left most card being highlighted
-			//if partner has obvious discard
-				//send a hint with left most card being highlighted
-			//if the card in the discard position is important
-				//if its value is not playable
-					//if its value is leftmost unique
-						//sent a hint of its value
-		//Discard rightmost unknown card
 
-		return "DISCARD 0 0";
+
+
+
+		//If we have tokens
+		if(boardState.numHints > 0) {
+			//if partner has obvious play
+			for (int i = 0; i < 5; i++) {
+				if (whatPartnerKnows[i].isDefinitelyPlayable(boardState)) {
+					//send a hint with left most card being highlighted
+					//if numleft is unique
+					if(uniqueNumLeftOn(partnerHand, i))
+					{
+						return "NUMBERHINT " + partnerHand.get(i).value;
+					}
+					//if colorleft is unique
+					if(uniqueColorLeftOn(partnerHand, i))
+					{
+						return "COLORHINT " + partnerHand.get(i).color;
+					}
+				}
+			}
+			//if partner has obvious discard
+			for (int i = 0; i < 5; i++) {
+				if (whatPartnerKnows[i].isDiscardable(boardState)) {
+					//send a hint with left most card being highlighted
+					//if numleft is unique
+					if(uniqueNumLeftOn(partnerHand, i))
+					{
+						return "NUMBERHINT " + partnerHand.get(i).value;
+					}
+					//if colorleft is unique
+					if(uniqueColorLeftOn(partnerHand, i))
+					{
+						return "COLORHINT " + partnerHand.get(i).color;
+					}
+				}
+			}
+			//if the card in the discard position is important
+			int partnerDiscardIndex = getPartnerDiscardIndex();
+			if(partnerDiscardIndex != -1)
+			{
+				Card partnerCard = partnerHand.get(partnerDiscardIndex);
+				if(getCardsThatHaveOneLeft(boardState).contains(partnerCard))
+				{
+					//this card is important
+					if(!whatPartnerKnows[partnerDiscardIndex].couldBePlayable(boardState))
+					{
+						//this card is NOT playable
+						//if its value is leftmost unique
+						if(uniqueNumLeftOn(partnerHand, partnerDiscardIndex))
+						{
+							//send a hint of its value
+							return "NUMBERHINT " + partnerCard.value;
+						}
+					}
+				}
+			}
+		}
+
+		int discardIndex = getPartnerDiscardIndex();
+
+		return "DISCARD " + discardIndex + " " + discardIndex;
 	}
 
 	public boolean leftMostPlayPossible(ArrayList<Integer> focusIndexes, Board boardState){
@@ -400,6 +451,15 @@ public class Player {
 	public int getDiscardIndex(){
 		for (int i = 4; i >= 0; i--) {
 			if(knowledges[i].numOptions() == 25){
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	public int getPartnerDiscardIndex(){
+		for (int i = 4; i >= 0; i--) {
+			if(whatPartnerKnows[i].numOptions() == 25){
 				return i;
 			}
 		}
