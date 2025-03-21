@@ -42,6 +42,77 @@ public class Player {
 		}
 	}
 
+	public ArrayList<Card> getCardsThatHaveOneLeft(Board currentBoard)
+	{
+
+		//build a map that contains all initial counts of cards
+		HashMap<Card, Integer> cardCounts = new HashMap<>();
+		for(int clr=Colors.MIN_COLOR; clr<=Colors.MAX_COLOR; clr++) {
+			for (int val=Card.MIN_VALUE; val<=Card.MAX_VALUE; val++) {
+				Card theCard = new Card(clr, val);
+
+				if(val == 1)
+				{
+					cardCounts.put(theCard, 3);
+				}
+				else if(val == 2)
+				{
+					cardCounts.put(theCard, 2);
+				}
+				else if(val == 3)
+				{
+					cardCounts.put(theCard, 2);
+				}
+				else if(val == 4)
+				{
+					cardCounts.put(theCard, 2);
+				}
+				else
+				{
+					cardCounts.put(theCard, 1);
+				}
+			}
+		}
+
+		//remove all cards that have been played
+		for(int i = 0; i < currentBoard.tableau.size(); i++)
+		{
+			for(int j = 0; j < currentBoard.tableau.get(i); j++)
+			{
+				Card card = new Card(i, j);
+				if(cardCounts.containsKey(card))
+				{
+					cardCounts.remove(card);
+				}
+				else
+				{
+					System.out.println(RED + "I THOUGHT STARTING AT 0 WOULD BE A BAD IDEA!!!" + RESET);
+				}
+			}
+		}
+
+		//subtract discarded cards from card counts
+		for(Card c : currentBoard.discards)
+		{
+			if(cardCounts.containsKey(c))
+			{
+				cardCounts.put(c, cardCounts.get(c) - 1);
+			}
+		}
+
+		//return an arrayList of cards that have a count of 1
+		ArrayList<Card> cardsWithOneLeft = new ArrayList<>();
+		for(Card c : cardCounts.keySet())
+		{
+			if(cardCounts.get(c) == 1)
+			{
+				cardsWithOneLeft.add(c);
+			}
+		}
+
+		return cardsWithOneLeft;
+	}
+
 	public HashSet<Card> getImpossibleCards(Board currentBoard)
 	{
 		HashMap<Card, Integer> cardCounts = new HashMap<>();
@@ -165,6 +236,7 @@ public class Player {
 
 	//  This method runs whenever your partner gives you a hint as to the color of your cards.
 	public void tellColorHint(int color, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
+		focus = indices;
 		//update knowledge
 		for (int index : indices) {
 			knowledges[index].knowColor(color);
@@ -173,6 +245,8 @@ public class Player {
 
 	 // This method runs whenever your partner gives you a hint as to the numbers on your cards.
 	public void tellNumberHint(int number, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
+		focus = indices;
+
 		for(int index : indices){
 			knowledges[index].knowValue(number);
 		}
@@ -188,6 +262,11 @@ public class Player {
 		for(int index : indices){
 			whatPartnerKnows[index].knowColor(color);
 		}
+	}
+
+	public void resetFocus()
+	{
+		focus = null;
 	}
 
 	public ArrayList<Integer> getIndicesOfColor(Hand partnerHand, int color)
