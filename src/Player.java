@@ -342,6 +342,7 @@ public class Player {
 			//is there an obvious play? obvious when num options == 1 and playable
 			for(int idx : focus){
 				if(knowledges[idx].isDefinitelyPlayable(boardState)){
+					resetFocus();
 					return "PLAY " + idx + " " + idx;
 				}
 			}
@@ -350,6 +351,7 @@ public class Player {
 			for(int idx : focus){
 				if(knowledges[idx].isDiscardable(boardState)){
 					//discard it
+					resetFocus();
 					return "DISCARD " + idx + " " + idx;
 
 				}
@@ -358,10 +360,12 @@ public class Player {
 			//is the left most card playable?
 			if(knowledges[focus.getFirst()].couldBePlayable(boardState)){
 				//play it
+				resetFocus();
 				return "PLAY " + focus.getFirst() + " " + focus.getFirst();
 			}
 		}
 
+		resetFocus();
 		//If our token count > 6
 		if(boardState.numHints > 6) {
 			for (int i = 0; i < 5; i++) {
