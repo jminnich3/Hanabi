@@ -23,7 +23,7 @@ public class Player {
 
 	CardKnowledge[] knowledges;
 	CardKnowledge[] whatPartnerKnows;
-	int focusCardIndex; //implement to be updated as given hints
+	ArrayList<Integer> focus;
 
 	Random random;
 
@@ -153,39 +153,23 @@ public class Player {
 	// This method runs whenever you play a card, to let you know what you played.
 	public void tellYourPlay(Card play, int playIndex, int drawIndex, boolean drawSucceeded,
 							 boolean wasLegalPlay, Board boardState) {
-		knowledges[drawIndex] = new CardKnowledge(getImpossibleCards(boardState));
-	}
-
-	public void tellYourPlay(int index, boolean drawSucceeded, Board boardState) {
-		//update kowledge
-
 		if(drawSucceeded)
 		{
-			knowledges[index] = new CardKnowledge(getImpossibleCards(boardState));
+			knowledges[drawIndex] = new CardKnowledge(getImpossibleCards(boardState));
 		}
 		else
 		{
-			knowledges[index] = null;
+			knowledges[drawIndex] = null;
 		}
 	}
-
-
 
 	//  This method runs whenever your partner gives you a hint as to the color of your cards.
 	public void tellColorHint(int color, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
 		//update knowledge
-		for(int index : indices){
+		for (int index : indices) {
 			knowledges[index].knowColor(color);
 		}
 	}
-
-	public void tellColorHint(int color, ArrayList<Integer> indices) {
-		//update knowledge
-		for(int index : indices){
-			knowledges[index].knowColor(color);
-		}
-	}
-	
 
 	 // This method runs whenever your partner gives you a hint as to the numbers on your cards.
 	public void tellNumberHint(int number, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
