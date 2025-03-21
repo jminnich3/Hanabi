@@ -337,23 +337,62 @@ public class Player {
 		//ORDER OF PRIORITY CHOICES
 
 		//If we received a hint, (focus.size() > 0)
+		if(!focus.isEmpty()){
 			//ALL OF THESE ARE WITHIN OUR FOCUS INDICES
-			//is there an obvious play?
-				//play it
+			//is there an obvious play? obvious when num options == 1 and playable
+			for(int idx : focus){
+				if(knowledges[idx].isDefinitelyPlayable(boardState)){
+					return "PLAY " + idx + " " + idx;
+				}
+			}
+
 			//is there an obvious discard?
-				//discard it
+			for(int idx : focus){
+				if(knowledges[idx].isDiscardable(boardState)){
+					//discard it
+					return "DISCARD " + idx + " " + idx;
+
+				}
+			}
+
 			//is the left most card playable?
+			if(knowledges[focus.getFirst()].couldBePlayable(boardState)){
 				//play it
+				return "PLAY " + focus.getFirst() + " " + focus.getFirst();
+			}
+		}
+
 		//If our token count > 6
-			//do we have an obvious play?
-				//play it
-			//do we have an obvious discard?
-				//discard it
-		//If our token count <= 5
-			//do we have an obvious discard?
-				//discard it
-			//do we have an obvious play?
-				//play it
+		if(boardState.numHints > 6) {
+			for (int i = 0; i < 5; i++) {
+				if (knowledges[i].isDefinitelyPlayable(boardState)) {
+					return "PLAY " + i + " " + i;
+				}
+			}
+
+			//is there an obvious discard?
+			for (int i = 0; i < 5; i++) {
+				if (knowledges[i].isDiscardable(boardState)) {
+					//discard it
+					return "DISCARD " + i + " " + i;
+				}
+			}
+		}
+		else // discard  first now
+		{
+			// discard
+			for (int i = 0; i < 5; i++) {
+				if (knowledges[i].isDiscardable(boardState)) {
+					return "DISCARD " + i + " " + i;
+				}
+			}
+
+			for (int i = 0; i < 5; i++) {
+				if (knowledges[i].isDefinitelyPlayable(boardState)) {
+					return "PLAY " + i + " " + i;
+				}
+			}
+		}
 
 
 
