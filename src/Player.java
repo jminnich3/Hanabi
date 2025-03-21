@@ -333,148 +333,36 @@ public class Player {
 	 *     his cards have that color, or if no hints remain. This command consumes a hint.
 	 */
 	public String ask(int yourHandSize, Hand partnerHand, Board boardState) {
+		//ORDER OF PRIORITY CHOICES
 
-		// debug info
-		System.out.println(YELLOW + "NEW ASK: -----------------------------------------------------------" + RESET);
-		System.out.println("Here is the information that I know about each card:");
-		for(int i = 0; i < yourHandSize; i++)
-		{
-			System.out.println("Card " + i + ": " + knowledges[i].getOptions());
-		}
-		System.out.println();
-
-		System.out.println("PARTNER CARD INFO:");
-		for(int i = 0; i < yourHandSize; i++)
-		{
-			System.out.println("Card " + i + ": " + whatPartnerKnows[i].getOptions());
-		}
-
-		//obvious discard?
-		for(int i = 0; i < knowledges.length; i++)
-		{
-			if(knowledges[i].isDiscardable(boardState))
-			{
-				tellYourDiscard(i, true, boardState);
-				System.out.println(GREEN + "Discard " + i + " " + i + RESET);
-				return "DISCARD " + i + " " + i;
-			}
-		}
-
-		//obvious play?
-		for(int i = 0; i < knowledges.length; i++)
-		{
-			if(knowledges[i].isDefinitelyPlayable(boardState))
-			{
-				// tellYourPlay(i, true, boardState);
-				System.out.println(GREEN + "Play " + i + " " + i + RESET);
-				return "PLAY " + i + " " + i;
-			}
-//			if(knowledges[i].couldBePlayable(boardState))
-//			{
-//				if(random.nextInt(3) == 1)
-//				{
-//					tellYourPlay(i, true, boardState);
-//					return "PLAY " + i + " " + i;
-//				}
-//			}
-		}
-
-		//obvious hints?
-			//does partner have a playable card?
-			//does partner have a discardable card?
-				//number complete
-				//color complete
-			//does partner have > 2 of a number/color?
-
-
-		//this is checking if partner has a playable card
-		if(boardState.numHints > 0)
-		{
-			for(int i = 0; i < partnerHand.size(); i++)
-			{
-				Card currentCard = partnerHand.get(i);
-
-				System.out.println(BLUE + "Checking if partner has a playable card: " + currentCard.value + " of " + Colors.suitColor(currentCard.color)  + " == " + ((int)(boardState.tableau.get(currentCard.color)) + 1) + " of " + Colors.suitColor(currentCard.color) + RESET);
-
-				//currentCard.value == boardState.tableau.get(currentCard.color) + 1
-				if(currentCard.value == boardState.tableau.get(currentCard.color) + 1)
-				{
-					if(whatPartnerKnows[i].getKnownValue() != currentCard.value)
-					{
-						updatePartnerNumberHint(currentCard.value, getIndicesOfValue(partnerHand, currentCard.value));
-						System.out.println(GREEN + "Number hint " + currentCard.value + RESET);
-						return "NUMBERHINT " + currentCard.value;
-					}
-				}
-			}
-
-			//this hints a guaranteed discard
-			for(int i = 0; i < partnerHand.size(); i++)
-			{
-				Card currentCard = partnerHand.get(i);
-				if(isColorOfCardFullyUsed(currentCard, boardState) || isPartnerCardFullyLessThanOrEqualToAllBoardValues(currentCard, boardState))
-				{
-					if(whatPartnerKnows[i].getKnownValue() != currentCard.value)
-					{
-						updatePartnerNumberHint(currentCard.value, getIndicesOfValue(partnerHand, currentCard.value));
-						System.out.println(GREEN + "Number hint " + currentCard.value + RESET);
-						return "NUMBERHINT " + currentCard.value;
-					}
-				}
-			}
-		}
-
-		//if we have a lot of hints, give a hint that gives partner the most info possible
-		if(boardState.numHints > 6)
-		{
-			//hint color/number that has most of that type UNLESS they already know about it
-			int[] colorCounts = new int[5];
-			int[] valueCounts = new int[5];
-			for(int i = 0; i < partnerHand.size(); i++)
-			{
-				Card currentCard = partnerHand.get(i);
-				colorCounts[currentCard.color]++;
-				valueCounts[currentCard.value - 1]++;
-			}
-
-			int maxColor = 0;
-			int maxColorCount = 0;
-			for(int i = 0; i < colorCounts.length; i++)
-			{
-				if(colorCounts[i] > maxColorCount)
-				{
-					maxColor = i;
-					maxColorCount = colorCounts[i];
-				}
-			}
-
-			int maxValue = 0;
-			int maxValueCount = 0;
-			for(int i = 0; i < valueCounts.length; i++)
-			{
-				if(valueCounts[i] > maxValueCount)
-				{
-					maxValue = i + 1;
-					maxValueCount = valueCounts[i];
-				}
-			}
-
-			if(maxColorCount > maxValueCount)
-			{
-
-				System.out.println(BLUE + "It seems like the most in this card are colors " + Colors.suitColor(maxColor) + RESET);
-				updatePartnerColorHint(maxColor, getIndicesOfColor(partnerHand, maxColor));
-				System.out.println(GREEN + "Color hint " + maxColor + RESET);
-				return "COLORHINT " + maxColor;
-			}
-			else
-			{
-				System.out.println(BLUE + "It seems like the most in this card are values " + maxValue + RESET);
-				updatePartnerColorHint(maxValue, getIndicesOfValue(partnerHand, maxValue));
-				System.out.println(GREEN + "Number hint " + maxValue + RESET);
-				return "NUMBERHINT " + (maxValue);
-			}
-		}
+		//If we received a hint, (focus.size() > 0)
+			//ALL OF THESE ARE WITHIN OUR FOCUS INDICES
+			//is there an obvious play?
+				//play it
+			//is there an obvious discard?
+				//discard it
+			//is the left most card playable?
+				//play it
+		//If our token count > 6
+			//do we have an obvious play?
+				//play it
+			//do we have an obvious discard?
+				//discard it
+		//If our token count <= 5
+			//do we have an obvious discard?
+				//discard it
+			//do we have an obvious play?
+				//play it
+		//If we have tokens
+			//if partner has obvious play
+				//send a hint with left most card being highlighted
+			//if partner has obvious discard
+				//send a hint with left most card being highlighted
+			//if the card in the discard position is important
+				//if its value is not playable
+					//if its value is leftmost unique
+						//sent a hint of its value
+		//Discard rightmost unknown card
 
 		return "DISCARD 0 0";
 	}
