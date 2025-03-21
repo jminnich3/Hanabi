@@ -195,9 +195,14 @@ public class Player {
 	}
 
 	public void updatePartnerNumberHint(int number, ArrayList<Integer> indices) {
-		//update knowledge
 		for(int index : indices){
 			whatPartnerKnows[index].knowValue(number);
+		}
+	}
+
+	public void updatePartnerColorHint(int color, ArrayList<Integer> indices) {
+		for(int index : indices){
+			whatPartnerKnows[index].knowColor(color);
 		}
 	}
 
@@ -325,7 +330,7 @@ public class Player {
 			for(int i = 0; i < partnerHand.size(); i++)
 			{
 				Card currentCard = partnerHand.get(i);
-				//TODO: this needs fixed
+
 				System.out.println(BLUE + "Checking if partner has a playable card: " + currentCard.value + " of " + Colors.suitColor(currentCard.color)  + " == " + ((int)(boardState.tableau.get(currentCard.color)) + 1) + " of " + Colors.suitColor(currentCard.color) + RESET);
 
 				//currentCard.value == boardState.tableau.get(currentCard.color) + 1
@@ -335,13 +340,6 @@ public class Player {
 					{
 						updatePartnerNumberHint(currentCard.value, getIndicesOfValue(partnerHand, currentCard.value));
 						System.out.println(GREEN + "Number hint " + currentCard.value + RESET);
-
-						System.out.println("PARTNER CARD INFO:");
-						for(int k = 0; k < yourHandSize; k++)
-						{
-							System.out.println("Card " + k + ": " + whatPartnerKnows[k].getOptions());
-						}
-
 						return "NUMBERHINT " + currentCard.value;
 					}
 				}
@@ -364,7 +362,7 @@ public class Player {
 		}
 
 		//if we have a lot of hints, give a hint that gives partner the most info possible
-		if(boardState.numHints > 1)
+		if(boardState.numHints > 6)
 		{
 			//hint color/number that has most of that type UNLESS they already know about it
 			int[] colorCounts = new int[5];
@@ -402,20 +400,18 @@ public class Player {
 			{
 
 				System.out.println(BLUE + "It seems like the most in this card are colors " + Colors.suitColor(maxColor) + RESET);
-				//tellColorHint(maxColor, getIndicesOfColor(partnerHand, maxColor));
+				updatePartnerColorHint(maxColor, getIndicesOfColor(partnerHand, maxColor));
 				System.out.println(GREEN + "Color hint " + maxColor + RESET);
 				return "COLORHINT " + maxColor;
 			}
 			else
 			{
 				System.out.println(BLUE + "It seems like the most in this card are values " + maxValue + RESET);
-				//tellNumberHint(maxValue, getIndicesOfValue(partnerHand, maxValue));
+				updatePartnerColorHint(maxValue, getIndicesOfValue(partnerHand, maxValue));
 				System.out.println(GREEN + "Number hint " + maxValue + RESET);
 				return "NUMBERHINT " + (maxValue);
 			}
 		}
-
-
 
 		return "DISCARD 0 0";
 	}
