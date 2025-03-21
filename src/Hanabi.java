@@ -85,7 +85,7 @@ public class Hanabi {
 
 		while (true) {
 
-            System.out.println("\u001B[33m" + "\nCURRENT PLAYER = " + currentPlayer + "\u001B[33m");
+            System.out.println("\u001B[33m" + "\nCURRENT PLAYER = " + currentPlayer + "\u001B[0m");
 
 			String response = players.get(currentPlayer).ask(hands.get(currentPlayer).size(),
 					new Hand(hands.get(otherPlayer)), new Board(boardState)); // pass copies to avoid malicious editing

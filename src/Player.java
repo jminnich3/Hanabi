@@ -78,7 +78,7 @@ public class Player {
 		//remove all cards that have been played
 		for(int i = 0; i < currentBoard.tableau.size(); i++)
 		{
-			for(int j = 0; j < currentBoard.tableau.get(i); j++)
+			for(int j = 1; j <= currentBoard.tableau.get(i); j++)
 			{
 				Card card = new Card(i, j);
 				if(cardCounts.containsKey(card))
@@ -337,15 +337,8 @@ public class Player {
 		//ORDER OF PRIORITY CHOICES
 
 		//If we received a hint, (focus.size() > 0)
-		if(!focus.isEmpty()){
+		if(focus != null && !focus.isEmpty()){
 			//ALL OF THESE ARE WITHIN OUR FOCUS INDICES
-			//is there an obvious play? obvious when num options == 1 and playable
-			for(int idx : focus){
-				if(knowledges[idx].isDefinitelyPlayable(boardState)){
-					resetFocus();
-					return "PLAY " + idx + " " + idx;
-				}
-			}
 
 			//is there an obvious discard?
 			for(int idx : focus){
@@ -357,11 +350,20 @@ public class Player {
 				}
 			}
 
+			//is there an obvious play? obvious when num options == 1 and playable
+			for(int idx : focus){
+				if(knowledges[idx].isDefinitelyPlayable(boardState)){
+					resetFocus();
+					return "PLAY " + idx + " " + idx;
+				}
+			}
+
 			//is the left most card playable?
 			if(knowledges[focus.getFirst()].couldBePlayable(boardState)){
 				//play it
+				int playIndex = focus.getFirst();
 				resetFocus();
-				return "PLAY " + focus.getFirst() + " " + focus.getFirst();
+				return "PLAY " + playIndex + " " + playIndex;
 			}
 		}
 
@@ -405,32 +407,36 @@ public class Player {
 		if(boardState.numHints > 0) {
 			//if partner has obvious play
 			for (int i = 0; i < 5; i++) {
-				if (whatPartnerKnows[i].isDefinitelyPlayable(boardState)) {
+				if (playable(partnerHand.get(i), boardState)) {
 					//send a hint with left most card being highlighted
 					//if numleft is unique
 					if(uniqueNumLeftOn(partnerHand, i))
 					{
+						System.out.println(BLUE + "Hinting to play" + RESET);
 						return "NUMBERHINT " + partnerHand.get(i).value;
 					}
 					//if colorleft is unique
 					if(uniqueColorLeftOn(partnerHand, i))
 					{
+						System.out.println(BLUE + "Hinting to play" + RESET);
 						return "COLORHINT " + partnerHand.get(i).color;
 					}
 				}
 			}
 			//if partner has obvious discard
 			for (int i = 0; i < 5; i++) {
-				if (whatPartnerKnows[i].isDiscardable(boardState)) {
+				if (discardable(partnerHand.get(i), boardState)) {
 					//send a hint with left most card being highlighted
 					//if numleft is unique
 					if(uniqueNumLeftOn(partnerHand, i))
 					{
+						System.out.println(BLUE + "Hinting to discard" + RESET);
 						return "NUMBERHINT " + partnerHand.get(i).value;
 					}
 					//if colorleft is unique
 					if(uniqueColorLeftOn(partnerHand, i))
 					{
+						System.out.println(BLUE + "Hinting to discard" + RESET);
 						return "COLORHINT " + partnerHand.get(i).color;
 					}
 				}
@@ -450,6 +456,7 @@ public class Player {
 						if(uniqueNumLeftOn(partnerHand, partnerDiscardIndex))
 						{
 							//send a hint of its value
+							System.out.println(BLUE + "Hinting to save important card" + RESET);
 							return "NUMBERHINT " + partnerCard.value;
 						}
 					}
@@ -457,9 +464,15 @@ public class Player {
 			}
 		}
 
-		int discardIndex = getPartnerDiscardIndex();
-
-		return "DISCARD " + discardIndex + " " + discardIndex;
+		int discardIndex = getDiscardIndex();
+		if(discardIndex != -1){
+			return "DISCARD " + discardIndex + " " + discardIndex;
+		}
+		else
+		{
+			discardIndex = getLeftMostNonNullIndex();
+			return "DISCARD " + discardIndex + " " + discardIndex;
+		}
 	}
 
 	public boolean leftMostPlayPossible(ArrayList<Integer> focusIndexes, Board boardState){
@@ -507,6 +520,36 @@ public class Player {
 			}
 		}
 		return -1;
+	}
+
+	public boolean playable(Card c, Board boardState){
+		return c.value == (boardState.tableau.get(c.color) + 1);
+	}
+
+	public boolean discardable(Card c, Board boardState){
+		System.out.println(RED + "Checking to see if " + c.toString() + " is discardable" + RESET);
+		for (int i = 0; i < boardState.tableau.size(); i++) {
+			if (boardState.tableau.get(i) < c.value) {
+				// This card option is still useful for the tableau
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public int getLeftMostNonNullIndex()
+	{
+		int minOptions = 26;
+		int minIndex = 5;
+
+		for (int i = 4; i >= 0; i--) {
+			if(knowledges[i] != null && knowledges[i].numOptions() < minOptions){
+				minOptions = knowledges[i].numOptions();
+				minIndex = i;
+			}
+		}
+
+		return minIndex;
 	}
 
 }
