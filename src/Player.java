@@ -369,34 +369,18 @@ public class Player {
 
 		resetFocus();
 		//If our token count > 6
-		if(boardState.numHints > 6) {
-			for (int i = 0; i < 5; i++) {
-				if (knowledges[i].isDefinitelyPlayable(boardState)) {
-					return "PLAY " + i + " " + i;
-				}
-			}
-
-			//is there an obvious discard?
-			for (int i = 0; i < 5; i++) {
-				if (knowledges[i].isDiscardable(boardState)) {
-					//discard it
-					return "DISCARD " + i + " " + i;
-				}
+		//if(boardState.numHints > 6) {
+		for (int i = 0; i < 5; i++) {
+			if (knowledges[i].isDefinitelyPlayable(boardState)) {
+				return "PLAY " + i + " " + i;
 			}
 		}
-		else // discard  first now
-		{
-			// discard
-			for (int i = 0; i < 5; i++) {
-				if (knowledges[i].isDiscardable(boardState)) {
-					return "DISCARD " + i + " " + i;
-				}
-			}
 
-			for (int i = 0; i < 5; i++) {
-				if (knowledges[i].isDefinitelyPlayable(boardState)) {
-					return "PLAY " + i + " " + i;
-				}
+		//is there an obvious discard?
+		for (int i = 0; i < 5; i++) {
+			if (knowledges[i].isDiscardable(boardState)) {
+				//discard it
+				return "DISCARD " + i + " " + i;
 			}
 		}
 
@@ -412,13 +396,13 @@ public class Player {
 					//if numleft is unique
 					if(uniqueNumLeftOn(partnerHand, i))
 					{
-						System.out.println(BLUE + "Hinting to play" + RESET);
+						//System.out.println(BLUE + "Hinting to play" + RESET);
 						return "NUMBERHINT " + partnerHand.get(i).value;
 					}
 					//if colorleft is unique
 					if(uniqueColorLeftOn(partnerHand, i))
 					{
-						System.out.println(BLUE + "Hinting to play" + RESET);
+						//System.out.println(BLUE + "Hinting to play" + RESET);
 						return "COLORHINT " + partnerHand.get(i).color;
 					}
 				}
@@ -430,13 +414,13 @@ public class Player {
 					//if numleft is unique
 					if(uniqueNumLeftOn(partnerHand, i))
 					{
-						System.out.println(BLUE + "Hinting to discard" + RESET);
+						//System.out.println(BLUE + "Hinting to discard" + RESET);
 						return "NUMBERHINT " + partnerHand.get(i).value;
 					}
 					//if colorleft is unique
 					if(uniqueColorLeftOn(partnerHand, i))
 					{
-						System.out.println(BLUE + "Hinting to discard" + RESET);
+						//System.out.println(BLUE + "Hinting to discard" + RESET);
 						return "COLORHINT " + partnerHand.get(i).color;
 					}
 				}
@@ -456,7 +440,7 @@ public class Player {
 						if(uniqueNumLeftOn(partnerHand, partnerDiscardIndex))
 						{
 							//send a hint of its value
-							System.out.println(BLUE + "Hinting to save important card" + RESET);
+							//System.out.println(BLUE + "Hinting to save important card" + RESET);
 							return "NUMBERHINT " + partnerCard.value;
 						}
 					}
